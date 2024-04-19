@@ -35,10 +35,11 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Password is Require"],
     },
-    watchHistory: {
+    watchHistory: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Video",
-    },
+    }
+    ],
   },
   { timestamps: true },
 );

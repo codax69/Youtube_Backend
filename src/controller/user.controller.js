@@ -4,6 +4,19 @@ import ApiResponse from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { cloudinaryUpload } from "../utils/cloudinaryHandler.js";
 
+const generateRefreshTokenAndAccessToken = async(userId) =>{
+  try {
+    const user = await User.findById(userId)
+    const accessToken = user.generateAccessToken()
+    const refreshToken = user.generateRefreshToken()
+
+    user.save({validBeforeSave : false})
+    return {accessToken,refreshToken}
+
+  } catch (error) {
+    throw new ApiError(500,"something went wrong while generate refresh and access Token..!")
+  }
+}
 const registerUser = asyncHandler(async (req, res, next) => {
   try {
     console.log("Received body:", req.body);
@@ -33,38 +46,22 @@ const registerUser = asyncHandler(async (req, res, next) => {
     }
 
     const avatarLocalPath = req.files?.avatar?.[0]?.path;
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+    console.log(avatarLocalPath, coverImageLocalPath);
     if (!avatarLocalPath) {
       return next(new ApiError(400, "Avatar file is required."));
     }
-
-    let avatarUrl = "";
-    try {
-      const avatar = await cloudinaryUpload(avatarLocalPath);
-       avatarUrl = avatar.path
-    } catch (error) {
-      console.error("Error during avatar upload:", error);
-      return next(new ApiError(500, "Failed to upload avatar."));
-    }
-
-    let coverImageUrl = "";
-    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
-    if (coverImageLocalPath) {
-      try {
-        const coverImage = await cloudinaryUpload(coverImageLocalPath);
-        coverImageUrl = coverImage[0]?.path;
-      } catch (error) {
-        return next(new ApiError(500, "Failed to upload cover image."));
-      }
-    }
-    console.log(avatarUrl,coverImageUrl)
+    const avatar = await cloudinaryUpload(avatarLocalPath);
+    const coverImage = await cloudinaryUpload(coverImageLocalPath);
+    console.log(avatar, coverImage);
 
     const user = await User.create({
       fullName,
       email,
       password,
       username: username.toLowerCase(),
-      avatar: avatarUrl.url,
-      coverImage: coverImageUrl.url || "",
+      avatar: avatar.url,
+      coverImage: coverImage.url || "",
     });
 
     if (!user) {
@@ -80,5 +77,28 @@ const registerUser = asyncHandler(async (req, res, next) => {
     next(error);
   }
 });
+const loginUser = asyncHandler(async (req, res) => {
+  //get data
+  //username or email
+  //find user
+  // check password
+   const {username, email,password } = req.body
+   if(!username || !email){
+    throw new ApiError(409,"Username or Email are Required!!")
+   }
+   const user = await User.findOne({
+    $or:[{username},{email}]
+   })
+   if(!user){
+    throw new ApiError(404,"User dose not exist..!")
+   }
+   const isPasswordValid = await user.isPasswordCorrect(password)
+   if(!isPasswordValid){
+    throw new ApiError(401,"Incorrect Password..!")
+   }
+  
+  const {accessToken,refreshToken}= await generateRefreshTokenAndAccessToken(user._id)
+  
 
-export { registerUser };
+});
+export { registerUser, loginUser };
