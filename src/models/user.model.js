@@ -35,26 +35,29 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Password is Require"],
     },
-    refreshToken:{
-      type:String
+    refreshToken: {
+      type: String,
     },
-    accessToken:{
-      type:String
+    accessToken: {
+      type: String,
     },
-    watchHistory: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Video",
-    }
+    watchHistory: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Video",
+      },
     ],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
+
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
   };
+
   userSchema.methods.generateAccessToken = async function () {
     return jwt.sign(
       {
@@ -66,7 +69,7 @@ userSchema.pre("save", async function (next) {
       process.env.ACCESS_TOKEN_SECRET,
       {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-      },
+      }
     );
   };
   userSchema.methods.generateRefreshToken = async function () {
@@ -77,7 +80,7 @@ userSchema.pre("save", async function (next) {
       process.env.REFRESH_TOKEN_SECRET,
       {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-      },
+      }
     );
   };
 });
