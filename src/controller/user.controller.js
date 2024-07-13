@@ -1,9 +1,13 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiErrorHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
-import { User } from "../models/user.model.js";
+import  User  from "../models/user.model.js";
 import { cloudinaryUpload } from "../utils/cloudinaryHandler.js";
-import { jwt } from "json-web-token";
+import pkg from 'json-web-token';
+const { jwt } = pkg;
+
+
+
 
 // generate tokens using one method
 const generateRefreshTokenAndAccessToken = async (userId) => {
@@ -305,6 +309,16 @@ const updateCoverImage = asyncHandler(async(req,res,next)=>{
     next(error)
   }
 })
+const getProfiledetails = asyncHandler(async(req,res,next)=>{
+try {
+  const {username} = req.params
+  // ! Write piplines
+  res.status(200)
+  .json(new ApiResponse(200,{username:username},"get  user successfully"))
+} catch (error) {
+  next(error)
+}
+})
 export {
   registerUser,
   loginUser,
@@ -314,5 +328,6 @@ export {
   changePassword,
   updateProfile,
   updateAvatar,
-  updateCoverImage
+  updateCoverImage,
+  getProfiledetails
 };

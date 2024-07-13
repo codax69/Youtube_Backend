@@ -1,4 +1,4 @@
-import { Schema, mongoose } from "mongoose";
+import mongoose,{ Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "json-web-token";
 
@@ -84,5 +84,5 @@ userSchema.pre("save", async function (next) {
     );
   };
 });
-
-export const User = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+export default User 

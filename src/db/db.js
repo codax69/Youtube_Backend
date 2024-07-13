@@ -13,4 +13,3 @@ const ConnectDb = async () => {
   }
 };
 export default ConnectDb;
-// ? console.log(DB_NAME)

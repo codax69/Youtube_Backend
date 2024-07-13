@@ -3,6 +3,7 @@ import { upload } from "../middleware/multer.middleware.js";
 import {
   changePassword,
   getCurrentUser,
+  getProfiledetails,
   logOutUser,
   loginUser,
   refreshAccessToken,
@@ -35,6 +36,7 @@ router.route("/refreshAccessToken").post(refreshAccessToken);
 router.route("/getCurrentUser").get(verifyJWT, getCurrentUser);
 router.route("/changePassword").post(verifyJWT, changePassword);
 router.route("/updateProfile").patch(verifyJWT, updateProfile);
+router.route("/c/:username").get(getProfiledetails)
 
 router
   .route("/change-avatar")
